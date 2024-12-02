@@ -5,16 +5,16 @@ fn is_safe_differences(differences: impl Iterator<Item = i32> + Clone) -> bool {
     (differences.clone().all(|i| i > 0) || differences.clone().all(|i| i < 0))
         && differences.clone().all(|i| i.abs() >= 1 && i.abs() <= 3)
 }
-fn is_safe_report(report: &Vec<i32>) -> bool {
+fn is_safe_report(report: &[i32]) -> bool {
     let differences = report.iter().tuple_windows().map(|(a, b)| b - a);
     is_safe_differences(differences)
 }
 
-fn is_safe_report_when_dampened(report: &Vec<i32>) -> bool {
+fn is_safe_report_when_dampened(report: &[i32]) -> bool {
     let n = report.len();
     is_safe_report(report)
         || report
-            .into_iter()
+            .iter()
             .cloned()
             .combinations(n - 1)
             .any(|v| is_safe_report(&v))
@@ -30,7 +30,7 @@ pub fn part_one(input: &str) -> Option<u32> {
                 .collect_vec()
         })
         .collect_vec();
-    Some(parsed.into_iter().filter(is_safe_report).count() as u32)
+    Some(parsed.into_iter().filter(|v| is_safe_report(v)).count() as u32)
 }
 
 pub fn part_two(input: &str) -> Option<u32> {
@@ -46,7 +46,7 @@ pub fn part_two(input: &str) -> Option<u32> {
     Some(
         parsed
             .into_iter()
-            .filter(is_safe_report_when_dampened)
+            .filter(|v| is_safe_report_when_dampened(v))
             .count() as u32,
     )
 }
