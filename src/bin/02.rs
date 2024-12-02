@@ -2,13 +2,9 @@ advent_of_code::solution!(2);
 use itertools::Itertools;
 
 fn is_safe(report: &Vec<i32>) -> bool {
-    let differences = report
-        .iter()
-        .tuple_windows()
-        .map(|(a, b)| b - a)
-        .collect_vec();
-    (differences.iter().all(|i| *i > 0) || differences.iter().all(|i| *i < 0))
-        && differences.iter().all(|i| i.abs() >= 1 && i.abs() <= 3)
+    let differences = report.iter().tuple_windows().map(|(a, b)| b - a);
+    (differences.clone().all(|i| i > 0) || differences.clone().all(|i| i < 0))
+        && differences.clone().all(|i| i.abs() >= 1 && i.abs() <= 3)
 }
 
 pub fn part_one(input: &str) -> Option<u32> {
