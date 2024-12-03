@@ -38,7 +38,7 @@ pub fn part_two(input: &str) -> Option<u32> {
         .into_iter()
         .map(|i| parsed.iter().cloned().map(|a| a[i]).collect_vec())
         .collect_vec();
-    return if let [first, second] = &transposed[..] {
+    if let [first, second] = &transposed[..] {
         let counts = second.iter().counts();
         let distance = first
             .iter()
@@ -47,7 +47,7 @@ pub fn part_two(input: &str) -> Option<u32> {
         Some(distance)
     } else {
         None
-    };
+    }
 }
 
 #[cfg(test)]
