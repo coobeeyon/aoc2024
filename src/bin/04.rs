@@ -1,4 +1,4 @@
-use itertools::{izip, multizip, Itertools};
+use itertools::{izip, Itertools};
 
 advent_of_code::solution!(4);
 
@@ -53,7 +53,36 @@ pub fn part_one(input: &str) -> Option<u32> {
 }
 
 pub fn part_two(input: &str) -> Option<u32> {
-    None
+    let rows = input.lines().map(|line| line.to_string()).collect_vec();
+    let cracked_rows = rows
+        .iter()
+        .map(|row| row.chars().tuple_windows::<(_, _, _)>().collect_vec())
+        .collect_vec();
+    let row_tuples = cracked_rows
+        .iter()
+        .tuple_windows::<(_, _, _)>()
+        .collect_vec();
+    let blocks = row_tuples
+        .iter()
+        .flat_map(|(a, b, c)| izip!(a.iter(), b.iter(), c.iter()).collect_vec())
+        .collect_vec();
+    let num_xmas = blocks
+        .iter()
+        .filter(|((ul, _, ur), (_, c, _), (bl, _, br))| {
+            (*c == 'A')
+                && match ul {
+                    'M' => *br == 'S',
+                    'S' => *br == 'M',
+                    _ => false,
+                }
+                && match ur {
+                    'M' => *bl == 'S',
+                    'S' => *bl == 'M',
+                    _ => false,
+                }
+        })
+        .count();
+    Some(num_xmas as u32)
 }
 
 #[cfg(test)]
@@ -69,6 +98,6 @@ mod tests {
     #[test]
     fn test_part_two() {
         let result = part_two(&advent_of_code::template::read_file("examples", DAY));
-        assert_eq!(result, None);
+        assert_eq!(result, Some(9));
     }
 }
