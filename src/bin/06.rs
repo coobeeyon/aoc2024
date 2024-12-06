@@ -10,6 +10,11 @@ enum Direction {
     W,
 }
 
+struct Pos {
+    x: i32,
+    y: i32,
+}
+
 fn turn_right(dir: Direction) -> Direction {
     match dir {
         Direction::E => Direction::S,
@@ -19,57 +24,61 @@ fn turn_right(dir: Direction) -> Direction {
     }
 }
 
-fn forward(dir: Direction, row: i32, col: i32) -> (i32, i32) {
+fn forward(dir: Direction, pos: &Pos) -> Pos {
     let next_row = match dir {
-        Direction::N => row - 1,
-        Direction::E => row,
-        Direction::S => row + 1,
-        Direction::W => row,
+        Direction::N => pos.y - 1,
+        Direction::E => pos.y,
+        Direction::S => pos.y + 1,
+        Direction::W => pos.y,
     };
     let next_col = match dir {
-        Direction::N => col,
-        Direction::E => col + 1,
-        Direction::S => col,
-        Direction::W => col - 1,
+        Direction::N => pos.x,
+        Direction::E => pos.x + 1,
+        Direction::S => pos.x,
+        Direction::W => pos.x - 1,
     };
-    (next_row, next_col)
+    Pos {
+        x: next_col,
+        y: next_row,
+    }
 }
 
-fn in_bounds(x: i32, y: i32, width: i32, height: i32) -> bool {
-    x >= 0 && x < width && y >= 0 && y < height
+fn in_bounds(pos: &Pos, width: i32, height: i32) -> bool {
+    pos.x >= 0 && pos.x < width && pos.y >= 0 && pos.y < height
 }
 
 pub fn part_one(input: &str) -> Option<u32> {
-    let mut map = input
+    let mut lab_map = input
         .lines()
         .map(|line| line.chars().collect_vec())
         .collect_vec();
-    let width = map[0].len() as i32;
-    let height = map.len() as i32;
-    let mut guard_row = map
+    let width = lab_map[0].len() as i32;
+    let height = lab_map.len() as i32;
+    let mut guard_pos = lab_map
         .iter()
         .find_position(|row| row.contains(&'^'))
-        .unwrap()
-        .0 as i32;
-    let mut guard_col = map[guard_row as usize]
-        .iter()
-        .find_position(|c| **c == '^')
-        .unwrap()
-        .0 as i32;
+        .map(|(row, v)| {
+            (
+                row as i32,
+                v.iter().find_position(|c| **c == '^').unwrap().0 as i32,
+            )
+        })
+        .map(|(row, col)| Pos { x: col, y: row })
+        .unwrap();
     let mut guard_direction = Direction::N;
 
-    while in_bounds(guard_col, guard_row, width, height) {
-        map[guard_row as usize][guard_col as usize] = 'X';
-        let (next_row, next_col) = forward(guard_direction, guard_row, guard_col);
-        if in_bounds(next_col, next_row, width, height)
-            && map[next_row as usize][next_col as usize] == '#'
+    while in_bounds(&guard_pos, width, height) {
+        lab_map[guard_pos.y as usize][guard_pos.x as usize] = 'X';
+        let next_pos = forward(guard_direction, &guard_pos);
+        if in_bounds(&next_pos, width, height)
+            && lab_map[next_pos.y as usize][next_pos.x as usize] == '#'
         {
             guard_direction = turn_right(guard_direction);
         } else {
-            (guard_col, guard_row) = (next_col, next_row);
+            guard_pos = next_pos;
         }
     }
-    let num_guarded: u32 = map
+    let num_guarded: u32 = lab_map
         .iter()
         .map(|row| row.iter().filter(|c| **c == 'X').count() as u32)
         .sum();
