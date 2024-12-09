@@ -1,18 +1,20 @@
+use std::collections::HashSet;
+
 use itertools::{Chunk, Itertools};
 
 advent_of_code::solution!(8);
 
 pub fn part_one(input: &str) -> Option<u32> {
     let board = input.lines().collect_vec();
-    let width = board[0].len();
-    let height = board.len();
+    let width = board[0].len() as i32;
+    let height = board.len() as i32;
     let occupied = board
         .iter()
         .enumerate()
         .flat_map(|(row, line)| {
             line.chars().enumerate().filter_map(move |(col, c)| {
                 if c != '.' {
-                    Some((c, (col, row)))
+                    Some((c, (col as i32, row as i32)))
                 } else {
                     None
                 }
@@ -23,8 +25,19 @@ pub fn part_one(input: &str) -> Option<u32> {
         .into_iter()
         .map(|(key, chunk)| (key, chunk.map(|(_, pos)| pos).collect_vec()))
         .collect_vec();
-    dbg!(occupied);
-    None
+
+    let antinodes = occupied
+        .iter()
+        .flat_map(|(_c, positions)| positions.iter().cartesian_product(positions.iter()))
+        .filter(|(a, b)| a != b)
+        .flat_map(|((x0, y0), (x1, y1))| {
+            let (dx, dy) = (x1 - x0, y1 - y0);
+            [(x0 - dx, y0 - dy), (x1 + dx, y1 + dy)]
+        })
+        .filter(|(x, y)| *x >= 0 && *x < width && *y >= 0 && *y < height)
+        .collect::<HashSet<(i32, i32)>>();
+
+    Some(antinodes.len() as u32)
 }
 
 pub fn part_two(input: &str) -> Option<u32> {
