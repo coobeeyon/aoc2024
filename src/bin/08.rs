@@ -1,6 +1,6 @@
 use std::collections::HashSet;
 
-use itertools::{Chunk, Itertools};
+use itertools::Itertools;
 
 advent_of_code::solution!(8);
 
