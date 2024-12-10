@@ -1,4 +1,4 @@
-use itertools::Itertools;
+use itertools::{Chunk, Itertools};
 
 advent_of_code::solution!(9);
 
@@ -30,7 +30,34 @@ pub fn part_one(input: &str) -> Option<u64> {
         .collect_vec();
     let mut start_index = 0;
     let mut end_index = disk.len() - 1;
-    None
+
+    while start_index < end_index {
+        while disk.get(end_index) == Some(&Sector::Free) {
+            disk.pop();
+            end_index -= 1;
+        }
+        if (start_index >= end_index) {
+            break;
+        }
+        if let Some(Sector::Id(_)) = disk.get(start_index) {
+            start_index += 1;
+        } else {
+            disk[start_index] = disk[end_index];
+            disk.pop();
+            start_index += 1;
+            end_index -= 1;
+        }
+    }
+
+    let checksum = disk
+        .into_iter()
+        .enumerate()
+        .map(|(i, sector)| match sector {
+            Sector::Free => 0,
+            Sector::Id(id) => id * i as u64,
+        })
+        .sum();
+    Some(checksum)
 }
 
 pub fn part_two(input: &str) -> Option<u64> {
